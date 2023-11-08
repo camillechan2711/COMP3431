@@ -1,4 +1,4 @@
-
+// Copyright 2019 ROBOTIS CO., LTD.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,21 +27,21 @@
 #define DEG2RAD (M_PI / 180.0)
 #define RAD2DEG (180.0 / M_PI)
 
-#define FRONT   0
-#define LEFT    1
-#define RIGHT   2
-#define FRIGHT  3
+#define CENTER 0
+#define LEFT   1
+#define RIGHT  2
+#define F_RIGHT 3
+#define B_RIGHT 4
+#define R_CENTER 5
 
-#define LINEAR_VELOCITY  0.4 
-#define ANGULAR_VELOCITY 1
-
+#define LINEAR_VELOCITY  0.15
+#define ANGULAR_VELOCITY 1.2
+ 
 #define GET_TB3_DIRECTION 0
 #define TB3_DRIVE_FORWARD 1
-#define TB3_LEFT_TURN     2
-#define TB3_RIGHT_TURN    3
-#define FIND_WALL         4 
-#define TB3_FINISH        5 
-
+#define TB3_RIGHT_TURN    2
+#define TB3_LEFT_TURN     3
+#define FIND_WALL         4
 class WallFollower : public rclcpp::Node
 {
 public:
@@ -59,10 +59,8 @@ private:
   // Variables
   double robot_pose_;
   double prev_robot_pose_;
-  double scan_data_[4];
-  tf2::Quaternion robot_odom_;
-  //tf2::Quaternion prev_robot_odom_;
-  bool moved_;
+  double scan_data_[3];
+
   // ROS timer
   rclcpp::TimerBase::SharedPtr update_timer_;
 
