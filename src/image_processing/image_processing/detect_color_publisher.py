@@ -5,6 +5,9 @@ from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
+import math
+
+#TODO implement math
 
 class ColorPublisher(Node):
     """
@@ -22,6 +25,9 @@ class ColorPublisher(Node):
             self.image_callback,
             10)
         self.subscription
+        
+        self.marker_list = MarkerArray()
+        self.marker_list.markers = []
 
         # laser listener
         self.scan_data = {}
@@ -35,11 +41,33 @@ class ColorPublisher(Node):
         self.tf2_buff = Buffer()
         self.tf2_listen = TransformListener(self.tf2_buff, self) 
 
-        self.hfov = 0
-        self.vfov = 0
-        self.cam_width = 0 
-        self.cam_height = 0
+        self.hfov = 62
+        self.vfov = 48
+        self.cam_width = 680
+        self.cam_height = 480
         self.br = CvBridge()
+
+    def find_angle_to_obj(self, obj_center):
+        hor_angle = ((obj_center[0] - self.cam_width)/self.cam_width)*self.hfov
+        ver_angle = ((obj_center[1] - self.cam_height)/self.cam_height)*self.vfov
+        return hor_angle, ver_angle
+    
+    def check_centered(self, obj_center, bound):
+        if obj_center+bound/2 == self.cam_width:
+            return False
+        elif obj_center-bound/2 == 0:
+            return False
+        return True
+    
+    def calc_real_camframe(self, obj_center):
+        hor_angle, ver_angle = self.find_angle_to_obj(obj_center)
+        dist = self.scan_data[hor_angle]
+        coords = []
+        coords[0] = dist*math.cos(hor_angle*(math.pi/180))
+        coords[1] = dist*math.sin(hor_angle*(math.pi/180))
+        coords[2] = dist*math.tan(ver_angle*(math.pi/180))
+        return coords
+
 
     def find_color_positions(self, mask, color_name, image):
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -127,6 +155,19 @@ class ColorPublisher(Node):
         cv2.waitKey(1)
 
         self.get_logger().info('Publishing: "%s"' % msg.data)
+
+    def transformToMap(self, coordinate):
+        transform = self.tf2_buff.lookup_transform(target_frame="map", source="camera_link", time=rclpy.time.Time()).transform
+        coordinate[0] = coordinate[0] + transform[0]
+        coordinate[1] = coordinate[1] + transform[1]
+        coordinate[2] = coordinate[2] + transform[2]
+        return coordinate
+
+    def createMarker(self, coordinate, color):
+        marker = Marker()
+        marker.id = len(self.marker) 
+
+        # TODO finish function
 
 def main(args=None):
     rclpy.init(args=args)
