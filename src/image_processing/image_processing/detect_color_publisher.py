@@ -22,6 +22,18 @@ class ColorPublisher(Node):
             self.image_callback,
             10)
         self.subscription
+
+        # laser listener
+        self.scan_data = {}
+        self.laser_scan = self.create_subscription(LaserScan, "/scan",
+                                                   callback=self.laser_callback, 
+                                                   10)
+        # marker publisher
+        self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
+
+        #transform 
+        self.tf2_buff = Buffer()
+        self.tf2_listen = TransformListener(self.tf2_buff, self) 
         
         self.br = CvBridge()
 
@@ -35,6 +47,12 @@ class ColorPublisher(Node):
             return f"{color_name}: x={x}, y={y}, w={w}, h={h}"
         return None
 
+
+    def laser_callback(self, data):
+        for i in range (-30, 30):
+            self.scan_data[abs(i)] = data.ranges[i]
+
+        
     def image_callback(self, msg):
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
