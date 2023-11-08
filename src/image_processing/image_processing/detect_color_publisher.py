@@ -34,7 +34,11 @@ class ColorPublisher(Node):
         #transform 
         self.tf2_buff = Buffer()
         self.tf2_listen = TransformListener(self.tf2_buff, self) 
-        
+
+        self.hfov = 0
+        self.vfov = 0
+        self.cam_width = 0 
+        self.cam_height = 0
         self.br = CvBridge()
 
     def find_color_positions(self, mask, color_name, image):
