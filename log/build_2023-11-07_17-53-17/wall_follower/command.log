@@ -1,0 +1,4 @@
+Invoking command in '/home/rsa/tmp/COMP3431/build/wall_follower': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake /home/rsa/tmp/COMP3431/src/wall_follower -DCMAKE_INSTALL_PREFIX=/home/rsa/tmp/COMP3431/install/wall_follower
+Invoked command in '/home/rsa/tmp/COMP3431/build/wall_follower' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake /home/rsa/tmp/COMP3431/src/wall_follower -DCMAKE_INSTALL_PREFIX=/home/rsa/tmp/COMP3431/install/wall_follower
+Invoking command in '/home/rsa/tmp/COMP3431/build/wall_follower': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --build /home/rsa/tmp/COMP3431/build/wall_follower -- -j6 -l6
+Invoked command in '/home/rsa/tmp/COMP3431/build/wall_follower' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/foxy /usr/bin/cmake --build /home/rsa/tmp/COMP3431/build/wall_follower -- -j6 -l6
