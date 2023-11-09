@@ -124,7 +124,7 @@ class ColorPublisher(Node):
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
-        # loop through object data structure creating markers for objects detected that are centered and have
+        # loop through object data structure creating markers for objects detected that are centered and have not had a marker created already
         for obj in self.object:
             if obj["centered"] and not self.check_seen((obj["x"], obj["y"])):
                 cam_frame_pos = self.calc_real_camframe(obj)
@@ -137,13 +137,14 @@ class ColorPublisher(Node):
     ### helper functions ###
 
     # find horizontal and vertical angle in degrees to obj from pixel measurements given the vertical and horizontal fov of the camera
-    # returns tuple[2] of type double.
+    # returns tuple[2] of type double, first index representing horizontal angle, second 
     def find_angle_to_obj(self, obj_center):
         hor_angle = ((obj_center[0] - self.cam_width)/self.cam_width)*self.hfov
         ver_angle = ((obj_center[1] - self.cam_height)/self.cam_height)*self.vfov
         return hor_angle, ver_angle
     
     # check if object is too far to left or right. 
+    # If too far to left or right the center of the object will be a "fake" center as we do not see the entire object.
     # returns True or False, if centered True. 
     def check_centered(self, x, w):
         if x+w/2 == self.cam_width:
