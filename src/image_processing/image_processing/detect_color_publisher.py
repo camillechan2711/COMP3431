@@ -6,6 +6,7 @@ from cv_bridge import CvBridge
 from tf2_ros.transform_listener import TransformListener
 from tf2_ros.buffer import Buffer
 from visualization_msgs.msg import Marker, MarkerArray
+from message_filters import TimeSynchronizer, Subscriber
 import cv2
 import numpy as np
 import math
@@ -161,7 +162,8 @@ class ColorPublisher(Node):
     def calc_real_camframe(self, obj):
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
         # issue: scans and image callback may not be synchronous causing for this distance from laser scan to be inaccurate to the angle gotten from image data
-        # meaning failure.
+        # meaning failure. 
+        # TODO: implement message_filter synchronization with Subscriber and TimeSynchronizer
         dist = self.scan_data[hor_angle]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
