@@ -22,8 +22,7 @@ class ColorPublisher(Node):
         self.subscription = self.create_subscription(
             Image,
             '/camera/rgb/image_raw',
-            self.image_callback,
-            10)
+            self.image_callback, 10)
         self.subscription
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
         self.object = {}
