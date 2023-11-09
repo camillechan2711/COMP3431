@@ -150,18 +150,13 @@ class ColorPublisher(Node):
 
         # Publish the positions if detected
         if pink_position:
-            
             self.appendObject(pink_position, "pink")
-            self.position_publisher_.publish(pink_position)
         if green_position:
             self.appendObject(pink_position, "green")
-            self.position_publisher_.publish(green_position)
         if yellow_position:
             self.appendObject(pink_position, "yellow")
-            self.position_publisher_.publish(yellow_position)
         if blue_position:
             self.appendObject(pink_position, "blue")
-            self.position_publisher_.publish(blue_position)
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
@@ -171,6 +166,8 @@ class ColorPublisher(Node):
                 cam_frame_pos = self.calc_real_camframe(obj)
                 map_frame_pos = self.transformToMap(cam_frame_pos)
                 self.createMarker(map_frame_pos, obj["color"])
+
+        self.object = []
 
 
     def appendObject(self, position, color):
