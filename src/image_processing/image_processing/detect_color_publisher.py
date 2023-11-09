@@ -30,6 +30,8 @@ class ColorPublisher(Node):
             10)
         self.subscription
         
+        self.object = {}
+
         self.marker_list = MarkerArray()
         self.marker_list.markers = []
 
@@ -80,7 +82,7 @@ class ColorPublisher(Node):
             x, y, w, h = cv2.boundingRect(max_contour)
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(image, color_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            return f"{color_name}: x={x}, y={y}, w={w}, h={h}"
+            return x, y, w, h
         return None
 
 
@@ -125,16 +127,16 @@ class ColorPublisher(Node):
         # result_green = cv2.bitwise_and(image, image, mask=mask_green)
 
         if non_zero_pink > threshold:
-            find_color_positions(mask_pink, 'Pink')
+            self.find_color_positions(mask_pink, 'Pink')
 
         if non_zero_yellow > threshold:
-            find_color_positions(mask_yellow,'yellow')
+            self.find_color_positions(mask_yellow,'yellow')
 
         if non_zero_green > threshold:
-            find_color_positions(mask_green, 'Green')
+            self.find_color_positions(mask_green, 'Green')
 
         if non_zero_blue > threshold:
-            find_color_positions(mask_blue,'blue')
+            self.find_color_positions(mask_blue,'blue')
 
         cv2.imshow('Result', image)
         cv2.waitKey(0)
@@ -148,17 +150,40 @@ class ColorPublisher(Node):
 
         # Publish the positions if detected
         if pink_position:
+            
+            self.appendObject(pink_position, "pink")
             self.position_publisher_.publish(pink_position)
         if green_position:
+            self.appendObject(pink_position, "green")
             self.position_publisher_.publish(green_position)
         if yellow_position:
+            self.appendObject(pink_position, "yellow")
             self.position_publisher_.publish(yellow_position)
         if blue_position:
+            self.appendObject(pink_position, "blue")
             self.position_publisher_.publish(blue_position)
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
         self.get_logger().info('Publishing: "%s"' % msg.data)
+        for obj in self.object:
+            if obj["centered"]:
+                cam_frame_pos = self.calc_real_camframe(obj)
+                map_frame_pos = self.transformToMap(cam_frame_pos)
+                self.createMarker(map_frame_pos, obj["color"])
+
+
+    def appendObject(self, position, color):
+        x, y, w, h = position
+        centered = self.check_centered(x, y, w, h)
+        self.objects.append({"x": x, "y": y, "w": w, "h": h, "color": color})
+
+    def check_seen(self, coord):
+        for marker in self.marker_list.markers:
+            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
+                return True
+            return False
+
 
     def transformToMap(self, coordinate):
         transform = self.tf2_buff.lookup_transform(target_frame="map", source="camera_link", time=rclpy.time.Time()).transform
