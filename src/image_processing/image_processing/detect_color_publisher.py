@@ -11,8 +11,6 @@ import numpy as np
 import math
 
 
-#TODO implement math
-
 class ColorPublisher(Node):
     """
     Create an ImagePublisher class, which is a subclass of the Node class.
@@ -110,6 +108,7 @@ class ColorPublisher(Node):
         cv2.destroyAllWindows()
         # ... [rest of the color detection code]
 
+        # issue: what if two markers are in frame at the same time with the same color? Should maybe have some sort of while loop. 
         pink_position = self.find_color_positions(mask_pink, 'Pink', cv_image)
         green_position = self.find_color_positions(mask_green, 'Green', cv_image)
         yellow_position = self.find_color_positions(mask_yellow, 'yellow', cv_image)
@@ -154,8 +153,10 @@ class ColorPublisher(Node):
     # find position of object in camera frame using angle and data from laser scan.
     def calc_real_camframe(self, obj):
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
+        # issue: scans and image callback may not be synchronous causing for this distance from laser scan to be inaccurate to the angle gotten from image data
+        # meaning failure.
         dist = self.scan_data[hor_angle]
-        # check for if object is too close. too close will cause for incorrect z pos
+        # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
             return None
         coords = []
@@ -178,7 +179,7 @@ class ColorPublisher(Node):
     # append object to object data structure with x and y coords in image, color and centered status.
     # void return
     def appendObject(self, position, color):
-        x, y, w, h = position
+        x, y, w = position
         centered = self.check_centered(x, w)
         self.objects.append({"x": x, "y": y, "color": color, "centered": centered})
 
@@ -207,14 +208,14 @@ class ColorPublisher(Node):
         marker.header.frame_id = "/map"
         marker.header.stamp = rclpy.time.Time()
 
-        marker.type = 3
+        marker.type = marker.CYLINDER
         marker.id = len(self.marker_list.markers + 1)
 
         # Set the scale of the marker
         marker.scale.x = 0.2
         marker.scale.y = 0.2
         marker.scale.z = 0.2
-
+        marker.color.a = 0.5
         if color == "pink":
             marker.color.r = 1
             marker.color.g = 0.75
