@@ -128,10 +128,11 @@ class ColorPublisher(Node):
 
         # loop through object data structure creating markers for objects detected that are centered and have not had a marker created already
         for obj in self.object:
-            if obj["centered"] and not self.check_seen((obj["x"], obj["y"])):
+            if obj["centered"]:
                 cam_frame_pos = self.calc_real_camframe(obj)
                 if not cam_frame_pos: continue
                 map_frame_pos = self.transformToMap(cam_frame_pos)
+                if self.check_seen(map_frame_pos[0], map_frame_pos[1]): continue
                 self.createMarker(map_frame_pos, obj["color"])
 
         self.object = []
