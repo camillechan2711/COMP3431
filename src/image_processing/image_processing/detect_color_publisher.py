@@ -25,9 +25,11 @@ class ColorPublisher(Node):
             self.image_callback, 10)
         self.subscription
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
+        # Each entry has keys "x": int, x position in image, "y": int, y position in image, "color": string, "centered": bool 
         self.object = {}
 
-        # marker data structure. marker_list.markers stores created markers. 
+        # marker data structure. marker_list.markers stores created markers.
+        # ros standard marker structure stored in list.
         self.marker_list = MarkerArray()
         self.marker_list.markers = []
 
