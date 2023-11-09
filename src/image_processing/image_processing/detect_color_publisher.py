@@ -164,6 +164,7 @@ class ColorPublisher(Node):
         # issue: scans and image callback may not be synchronous causing for this distance from laser scan to be inaccurate to the angle gotten from image data
         # meaning failure. 
         # TODO: implement message_filter synchronization with Subscriber and TimeSynchronizer
+        # https://docs.ros.org/en/melodic/api/message_filters/html/python/index.html
         dist = self.scan_data[hor_angle]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
