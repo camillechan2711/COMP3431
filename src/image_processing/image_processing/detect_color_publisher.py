@@ -184,7 +184,7 @@ class ColorPublisher(Node):
             x, y, w, h = cv2.boundingRect(max_contour)
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(image, color_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            return (x+(w/2)）, (y+(h/2)), w, h
+            return (x+(w/2)), (y+(h/2)), w, h
         return None
 
     # append object to object data structure with x and y coords in image, color and centered status.
