@@ -20,18 +20,17 @@ class ColorPublisher(Node):
     def __init__(self):
         super().__init__('color_publisher')
         
-        self.publisher_ = self.create_publisher(String, 'detected_colors_topic', 10)
-        self.position_publisher_ = self.create_publisher(String, 'detected_colors_positions', 10)
-        
+        # image data subscription
         self.subscription = self.create_subscription(
             Image,
             '/camera/rgb/image_raw',
             self.image_callback,
             10)
         self.subscription
-        
+        # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
         self.object = {}
 
+        # marker data structure. marker_list.markers stores created markers. 
         self.marker_list = MarkerArray()
         self.marker_list.markers = []
 
@@ -43,17 +42,18 @@ class ColorPublisher(Node):
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
-        #transform 
+        #transform listener.
         self.tf2_buff = Buffer()
         self.tf2_listen = TransformListener(self.tf2_buff, self) 
 
+        # camera details for angle+distance math
         self.hfov = 62
         self.vfov = 48
         self.cam_width = 680
         self.cam_height = 480
         self.br = CvBridge()
 
-
+    ### callback functions ###
     def laser_callback(self, data):
         for i in range (-30, 30):
             self.scan_data[abs(i)] = data.ranges[i]
@@ -129,16 +129,21 @@ class ColorPublisher(Node):
         for obj in self.object:
             if obj["centered"] and not self.check_seen((obj["x"], obj["y"])):
                 cam_frame_pos = self.calc_real_camframe(obj)
+                if not cam_frame_pos: continue
                 map_frame_pos = self.transformToMap(cam_frame_pos)
                 self.createMarker(map_frame_pos, obj["color"])
 
         self.object = []
 
+    ### helper functions ###
+
+    # find horizontal and vertical angle to obj from pixel measurements given the vertical and horizontal fov of the camera
     def find_angle_to_obj(self, obj_center):
         hor_angle = ((obj_center[0] - self.cam_width)/self.cam_width)*self.hfov
         ver_angle = ((obj_center[1] - self.cam_height)/self.cam_height)*self.vfov
         return hor_angle, ver_angle
     
+    # check if object is too far to left or right. if not capturing entire object the center will be incorrect
     def check_centered(self, x, w):
         if x+w/2 == self.cam_width:
             return False
@@ -146,16 +151,20 @@ class ColorPublisher(Node):
             return False
         return True
     
+    # find position of object in camera frame using angle and data from laser scan.
     def calc_real_camframe(self, obj):
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
         dist = self.scan_data[hor_angle]
+        # check for if object is too close. too close will cause for incorrect z pos
+        if (dist < 0.5):
+            return None
         coords = []
         coords[0] = dist*math.cos(hor_angle*(math.pi/180))
         coords[1] = dist*math.sin(hor_angle*(math.pi/180))
         coords[2] = dist*math.tan(ver_angle*(math.pi/180))
         return coords
 
-
+    # finds center of color markers, returns center x, y and bounding box dimensions w: width, h: height
     def find_color_positions(self, mask, color_name, image):
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if contours:
@@ -166,19 +175,22 @@ class ColorPublisher(Node):
             return x, y, w, h
         return None
 
-        
+    # append object to object data structure with x and y coords in image, color and centered status.
+    # void return
     def appendObject(self, position, color):
         x, y, w, h = position
         centered = self.check_centered(x, w)
         self.objects.append({"x": x, "y": y, "color": color, "centered": centered})
 
+    # check if object has had a marker created. 
+    # returns bool
     def check_seen(self, coord):
         for marker in self.marker_list.markers:
             if math.sqrt((marker.pose.positionf.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
                 return True
             return False
 
-
+    # function to convert coordinate from camera frame to map frame
     def transformToMap(self, coordinate):
         transform = self.tf2_buff.lookup_transform(target_frame="map", source="camera_link", time=rclpy.time.Time()).transform
         coordinate[0] = coordinate[0] + transform[0]
@@ -186,6 +198,9 @@ class ColorPublisher(Node):
         coordinate[2] = coordinate[2] + transform[2]
         return coordinate
 
+
+    # function to create marker given map frame coords and color. Appends marker to marker list structure. 
+    # returns nothing.
     def createMarker(self, coord, color):
         marker = Marker()
 
