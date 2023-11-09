@@ -148,7 +148,6 @@ class ColorPublisher(Node):
         yellow_position = self.find_color_positions(mask_yellow, 'yellow', cv_image)
         blue_position = self.find_color_positions(mask_blue, 'blue', cv_image)
 
-        # Publish the positions if detected
         if pink_position:
             self.appendObject(pink_position, "pink")
         if green_position:
@@ -160,7 +159,6 @@ class ColorPublisher(Node):
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
-        self.get_logger().info('Publishing: "%s"' % msg.data)
         for obj in self.object:
             if obj["centered"]:
                 cam_frame_pos = self.calc_real_camframe(obj)
@@ -173,7 +171,7 @@ class ColorPublisher(Node):
     def appendObject(self, position, color):
         x, y, w, h = position
         centered = self.check_centered(x, y, w, h)
-        self.objects.append({"x": x, "y": y, "w": w, "h": h, "color": color})
+        self.objects.append({"x": x, "y": y, "w": w, "h": h, "color": color, "centered": centered})
 
     def check_seen(self, coord):
         for marker in self.marker_list.markers:
@@ -189,11 +187,48 @@ class ColorPublisher(Node):
         coordinate[2] = coordinate[2] + transform[2]
         return coordinate
 
-    def createMarker(self, coordinate, color):
+    def createMarker(self, coord, color):
         marker = Marker()
-        marker.id = len(self.marker) 
 
-        # TODO finish function
+        marker.header.frame_id = "/map"
+        marker.header.stamp = rclpy.time.Time()
+
+        marker.type = 3
+        marker.id = len(self.marker_list.markers + 1)
+
+        # Set the scale of the marker
+        marker.scale.x = 0.2
+        marker.scale.y = 0.2
+        marker.scale.z = 0.2
+
+        if color == "pink":
+            marker.color.r = 1
+            marker.color.g = 0.75
+            marker.color.b = 0.79
+        elif color == "blue":
+            marker.color.r = 0
+            marker.color.g = 0
+            marker.color.b = 1
+        elif color == "yellow":
+            marker.color.r = 1
+            marker.color.g = 1
+            marker.color.b = 0
+        elif color == "green":
+            marker.color.r = 0
+            marker.color.g = 1
+            marker.color.b = 0
+
+        # Set the pose of the marker
+        marker.pose.position.x = coord[0]
+        marker.pose.position.y = coord[1]
+        marker.pose.position.z = coord[2]
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 0.0
+        marker.pose.orientation.z = 0.0
+        marker.pose.orientation.w = 1.0
+        self.marker_list.markers.append(marker)
+        self.marker_publisher.publish(marker)
+        return
 
 def main(args=None):
     rclpy.init(args=args)
