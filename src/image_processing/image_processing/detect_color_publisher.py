@@ -53,44 +53,11 @@ class ColorPublisher(Node):
         self.cam_height = 480
         self.br = CvBridge()
 
-    def find_angle_to_obj(self, obj_center):
-        hor_angle = ((obj_center[0] - self.cam_width)/self.cam_width)*self.hfov
-        ver_angle = ((obj_center[1] - self.cam_height)/self.cam_height)*self.vfov
-        return hor_angle, ver_angle
-    
-    def check_centered(self, obj_center, bound):
-        if obj_center+bound/2 == self.cam_width:
-            return False
-        elif obj_center-bound/2 == 0:
-            return False
-        return True
-    
-    def calc_real_camframe(self, obj_center):
-        hor_angle, ver_angle = self.find_angle_to_obj(obj_center)
-        dist = self.scan_data[hor_angle]
-        coords = []
-        coords[0] = dist*math.cos(hor_angle*(math.pi/180))
-        coords[1] = dist*math.sin(hor_angle*(math.pi/180))
-        coords[2] = dist*math.tan(ver_angle*(math.pi/180))
-        return coords
-
-
-    def find_color_positions(self, mask, color_name, image):
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if contours:
-            max_contour = max(contours, key=cv2.contourArea)
-            x, y, w, h = cv2.boundingRect(max_contour)
-            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(image, color_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            return x, y, w, h
-        return None
-
 
     def laser_callback(self, data):
         for i in range (-30, 30):
             self.scan_data[abs(i)] = data.ranges[i]
 
-        
     def image_callback(self, msg):
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
@@ -160,22 +127,54 @@ class ColorPublisher(Node):
         cv2.waitKey(1)
 
         for obj in self.object:
-            if obj["centered"]:
+            if obj["centered"] and not self.check_seen((obj["x"], obj["y"])):
                 cam_frame_pos = self.calc_real_camframe(obj)
                 map_frame_pos = self.transformToMap(cam_frame_pos)
                 self.createMarker(map_frame_pos, obj["color"])
 
         self.object = []
 
+    def find_angle_to_obj(self, obj_center):
+        hor_angle = ((obj_center[0] - self.cam_width)/self.cam_width)*self.hfov
+        ver_angle = ((obj_center[1] - self.cam_height)/self.cam_height)*self.vfov
+        return hor_angle, ver_angle
+    
+    def check_centered(self, x, w):
+        if x+w/2 == self.cam_width:
+            return False
+        elif x-w/2 == 0:
+            return False
+        return True
+    
+    def calc_real_camframe(self, obj):
+        hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
+        dist = self.scan_data[hor_angle]
+        coords = []
+        coords[0] = dist*math.cos(hor_angle*(math.pi/180))
+        coords[1] = dist*math.sin(hor_angle*(math.pi/180))
+        coords[2] = dist*math.tan(ver_angle*(math.pi/180))
+        return coords
 
+
+    def find_color_positions(self, mask, color_name, image):
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if contours:
+            max_contour = max(contours, key=cv2.contourArea)
+            x, y, w, h = cv2.boundingRect(max_contour)
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(image, color_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            return x, y, w, h
+        return None
+
+        
     def appendObject(self, position, color):
         x, y, w, h = position
-        centered = self.check_centered(x, y, w, h)
-        self.objects.append({"x": x, "y": y, "w": w, "h": h, "color": color, "centered": centered})
+        centered = self.check_centered(x, w)
+        self.objects.append({"x": x, "y": y, "color": color, "centered": centered})
 
     def check_seen(self, coord):
         for marker in self.marker_list.markers:
-            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
+            if math.sqrt((marker.pose.positionf.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
                 return True
             return False
 
