@@ -125,6 +125,7 @@ class ColorPublisher(Node):
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
+        # loop through object data structure creating markers for objects detected that are centered and have
         for obj in self.object:
             if obj["centered"] and not self.check_seen((obj["x"], obj["y"])):
                 cam_frame_pos = self.calc_real_camframe(obj)
@@ -136,13 +137,15 @@ class ColorPublisher(Node):
 
     ### helper functions ###
 
-    # find horizontal and vertical angle to obj from pixel measurements given the vertical and horizontal fov of the camera
+    # find horizontal and vertical angle in degrees to obj from pixel measurements given the vertical and horizontal fov of the camera
+    # returns tuple[2] of type double.
     def find_angle_to_obj(self, obj_center):
         hor_angle = ((obj_center[0] - self.cam_width)/self.cam_width)*self.hfov
         ver_angle = ((obj_center[1] - self.cam_height)/self.cam_height)*self.vfov
         return hor_angle, ver_angle
     
-    # check if object is too far to left or right. if not capturing entire object the center will be incorrect
+    # check if object is too far to left or right. 
+    # returns True or False, if centered True. 
     def check_centered(self, x, w):
         if x+w/2 == self.cam_width:
             return False
@@ -150,7 +153,8 @@ class ColorPublisher(Node):
             return False
         return True
     
-    # find position of object in camera frame using angle and data from laser scan.
+    # function finds position of object in camera frame using angle and data from laser scan.
+    # returns None or double[3] coordinates. 
     def calc_real_camframe(self, obj):
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
         # issue: scans and image callback may not be synchronous causing for this distance from laser scan to be inaccurate to the angle gotten from image data
@@ -165,7 +169,8 @@ class ColorPublisher(Node):
         coords[2] = dist*math.tan(ver_angle*(math.pi/180))
         return coords
 
-    # finds center of color markers, returns center x, y and bounding box dimensions w: width, h: height
+    # finds center of color blobs.
+    # returns center x, y and bounding box dimensions w: width, h: height
     def find_color_positions(self, mask, color_name, image):
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if contours:
@@ -177,21 +182,23 @@ class ColorPublisher(Node):
         return None
 
     # append object to object data structure with x and y coords in image, color and centered status.
-    # void return
+    # void return, edits object data structure.
     def appendObject(self, position, color):
         x, y, w = position
         centered = self.check_centered(x, w)
         self.objects.append({"x": x, "y": y, "color": color, "centered": centered})
 
-    # check if object has had a marker created. 
-    # returns bool
+    # check if object has had a marker created already. 
+    # returns bool, True if marker for object found. 
     def check_seen(self, coord):
         for marker in self.marker_list.markers:
+            # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object. 
             if math.sqrt((marker.pose.positionf.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
                 return True
             return False
 
     # function to convert coordinate from camera frame to map frame
+    # returns double[3] coordinates.
     def transformToMap(self, coordinate):
         transform = self.tf2_buff.lookup_transform(target_frame="map", source="camera_link", time=rclpy.time.Time()).transform
         coordinate[0] = coordinate[0] + transform[0]
@@ -201,7 +208,7 @@ class ColorPublisher(Node):
 
 
     # function to create marker given map frame coords and color. Appends marker to marker list structure. 
-    # returns nothing.
+    # returns nothing. edits marker data structure and publishes to topic marker. 
     def createMarker(self, coord, color):
         marker = Marker()
 
