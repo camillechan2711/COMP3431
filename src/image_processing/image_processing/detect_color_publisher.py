@@ -34,7 +34,7 @@ class ColorPublisher(Node):
         # laser listener
         self.scan_data = {}
         self.laser_scan = self.create_subscription(LaserScan, "/scan",
-                                                   callback=self.laser_callback, 
+                                                   self.laser_callback, 
                                                    10)
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
