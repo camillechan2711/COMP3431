@@ -20,7 +20,7 @@
 #include "wall_follower/wall_follower.hpp"
 
 #include <memory>
-#define END 10
+
 using namespace std::chrono_literals;
 
 WallFollower::WallFollower()
@@ -86,26 +86,6 @@ void WallFollower::odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
 
 	robot_pose_ = yaw;
 }
-/*
-double averageDistance(int start_range, const sensor_msgs::msg::LaserScan::SharedPtr msg)
-{
-       double total = 0; 
-       for (int curr = start_range; curr < start_range + END; curr++)
-       {
-	        if (curr < 0) {
-		       curr += 360; 
-		}
-	       	if (std::isinf(msg->ranges.at(curr)))
-                {
-			total += msg->range_max;
-                } else {
-        		total += msg->ranges.at(curr);
-		}
-	//	RCLCPP_INFO(WallFollower<-get_logger(), "total: %f", total);
-       }
-       return total/ END;
-}
-*/
 
 void WallFollower::scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
