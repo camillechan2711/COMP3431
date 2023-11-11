@@ -129,12 +129,16 @@ class ColorPublisher(Node):
 
         if pink_position:
             self.appendObject(pink_position, "pink")
+            print("found pink marker")
         if green_position:
             self.appendObject(pink_position, "green")
+            print("found green marker")
         if yellow_position:
             self.appendObject(pink_position, "yellow")
+            print("found yellow marker")
         if blue_position:
             self.appendObject(pink_position, "blue")
+            print("found blue marker")
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
@@ -144,7 +148,7 @@ class ColorPublisher(Node):
                 cam_frame_pos = self.calc_real_camframe(obj)
                 if not cam_frame_pos: continue
                 map_frame_pos = self.transformToMap(cam_frame_pos)
-                if self.check_seen(map_frame_pos[0], map_frame_pos[1]): continue
+                if self.check_seen(map_frame_pos, obj["color"]): continue
                 self.createMarker(map_frame_pos, obj["color"])
 
         self.object = []
@@ -171,7 +175,9 @@ class ColorPublisher(Node):
     # function finds position of object in camera frame using angle and data from laser scan.
     # returns None or double[3] coordinates. 
     def calc_real_camframe(self, obj):
+        print("calculating position of object in camframe")
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
+        # dist here is based on distance from lidar rather than distance from camera which is more ideal. error may be negligible however. 
         dist = self.scan_data[hor_angle]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
@@ -179,7 +185,7 @@ class ColorPublisher(Node):
         coords = []
         coords[0] = dist*math.cos(hor_angle*(math.pi/180))
         coords[1] = dist*math.sin(hor_angle*(math.pi/180))
-        coords[2] = dist*math.tan(ver_angle*(math.pi/180))
+        coords[2] = dist*math.tan(ver_angle*(math.pi/180)) 
         return coords
 
     # finds center of color blobs.
@@ -203,10 +209,10 @@ class ColorPublisher(Node):
 
     # check if object has had a marker created already. 
     # returns bool, True if marker for object found. 
-    def check_seen(self, coord):
+    def check_seen(self, coord, color):
         for marker in self.marker_list.markers:
             # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object. 
-            if math.sqrt((marker.pose.positionf.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
+            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5 and not abs(coord[3]**2 - marker.pose.position.z**2) <= 0.14):
                 return True
             return False
 
