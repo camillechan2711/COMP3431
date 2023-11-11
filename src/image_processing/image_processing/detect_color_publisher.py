@@ -20,11 +20,20 @@ class ColorPublisher(Node):
         super().__init__('color_publisher')
         
         # image data subscription
-        self.subscription = self.create_subscription(
-            Image,
-            '/camera/rgb/image_raw',
-            self.image_callback, 10)
-        self.subscription
+        #
+        #self.subscription = self.create_subscription(
+        #    Image,
+        #    '/camera/rgb/image_raw',
+        #    self.image_callback, 10)
+        #self.subscription
+
+        # time synchronized topic subscription
+        image_sub = Subscriber('/camera/rgb/image_raw', Image)
+        scan_sub = Subscriber('/scan', LaserScan)
+        ts = message_filters.ApproximateTimeSynchronizer([image_sub, info_sub], 1, 1)
+        ts.registerCallback(laser_callback)
+        ts.registerCallback(image_callback)
+        
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
         # Each entry has keys "x": int, x position in image, "y": int, y position in image, "color": string, "centered": bool 
         self.object = {}
@@ -35,10 +44,10 @@ class ColorPublisher(Node):
         self.marker_list.markers = []
 
         # laser listener
-        self.scan_data = {}
-        self.laser_scan = self.create_subscription(LaserScan, "/scan",
-                                                   self.laser_callback, 
-                                                   10)
+        #self.scan_data = {}
+        #self.laser_scan = self.create_subscription(LaserScan, "/scan",
+        #                                           self.laser_callback, 
+        #                                           10)
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
