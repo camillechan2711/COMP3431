@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+        'image_processing = image_processing.detect_color_publisher:main'
         ],
     },
 )
