@@ -30,7 +30,7 @@ class ColorPublisher(Node):
         # time synchronized topic subscription
         image_sub = Subscriber('/camera/rgb/image_raw', Image)
         scan_sub = Subscriber('/scan', LaserScan)
-        ts = message_filters.ApproximateTimeSynchronizer([image_sub, info_sub], 1, 1)
+        ts = message_filters.ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
         ts.registerCallback(laser_callback)
         ts.registerCallback(image_callback)
         
@@ -64,10 +64,12 @@ class ColorPublisher(Node):
 
     ### callback functions ###
     def laser_callback(self, data):
+        scan = data[1]
         for i in range (-30, 30):
-            self.scan_data[abs(i)] = data.ranges[i]
+            self.scan_data[abs(i)] = scan.ranges[i]
 
-    def image_callback(self, msg):
+    def image_callback(self, data):
+        msg = data[0]
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
