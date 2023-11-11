@@ -28,8 +28,8 @@ class ColorPublisher(Node):
         #self.subscription
 
         # time synchronized topic subscription
-        image_sub = Subscriber('/camera/rgb/image_raw', Image)
-        scan_sub = Subscriber('/scan', LaserScan)
+        image_sub = Subscriber(self '/camera/rgb/image_raw', Image)
+        scan_sub = Subscriber(self, '/scan', LaserScan)
         ts = message_filters.ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
         ts.registerCallback(laser_callback)
         ts.registerCallback(image_callback)
