@@ -7,7 +7,7 @@ from cv_bridge import CvBridge
 from tf2_ros.transform_listener import TransformListener
 from tf2_ros.buffer import Buffer
 from visualization_msgs.msg import Marker, MarkerArray
-from message_filters import TimeSynchronizer, Subscriber
+from message_filters import ApproximateTimeSynchronizer, Subscriber
 import numpy as np
 import math
 
@@ -28,11 +28,12 @@ class ColorPublisher(Node):
         #self.subscription
 
         # time synchronized topic subscription
-        image_sub = Subscriber(self '/camera/rgb/image_raw', Image)
-        scan_sub = Subscriber(self, '/scan', LaserScan)
-        ts = message_filters.ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
-        ts.registerCallback(laser_callback)
-        ts.registerCallback(image_callback)
+        image_sub = Subscriber(self, Image, '/camera/rgb/image_raw')
+        scan_sub = Subscriber(self, LaserScan, '/scan')
+        ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
+        ts.registerCallback(self.laser_callback)
+        ts.registerCallback(self.image_callback)
+        print("subscribers initialized")
         
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
         # Each entry has keys "x": int, x position in image, "y": int, y position in image, "color": string, "centered": bool 
@@ -103,8 +104,8 @@ class ColorPublisher(Node):
         # result_pink = cv2.bitwise_and(image, image, mask=mask_pink)
         # result_yellow = cv2.bitwise_and(image, image, mask=mask_yellow)
         # result_green = cv2.bitwise_and(image, image, mask=mask_green)
-
-        if non_zero_pink > threshold:
+        print("scanning for markers")
+        if non_zero_pink > threshold:		
             self.find_color_positions(mask_pink, 'Pink')
 
         if non_zero_yellow > threshold:
@@ -128,13 +129,19 @@ class ColorPublisher(Node):
         blue_position = self.find_color_positions(mask_blue, 'blue', cv_image)
 
         if pink_position:
+            print("pink marker found")
             self.appendObject(pink_position, "pink")
-        if green_position:
+        elif green_position:
+            print("green marker found")
             self.appendObject(pink_position, "green")
-        if yellow_position:
+        elif yellow_position:
+            print("yellow marker found")
             self.appendObject(pink_position, "yellow")
-        if blue_position:
+        elif blue_position:
+            print("blue marker found")
             self.appendObject(pink_position, "blue")
+        else:
+            print("no markers found")
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
