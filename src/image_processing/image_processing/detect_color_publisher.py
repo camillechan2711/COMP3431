@@ -142,6 +142,7 @@ class ColorPublisher(Node):
             self.appendObject(pink_position, "blue")
         else:
             print("no markers found")
+            print("found pink marker")
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
@@ -151,7 +152,7 @@ class ColorPublisher(Node):
                 cam_frame_pos = self.calc_real_camframe(obj)
                 if not cam_frame_pos: continue
                 map_frame_pos = self.transformToMap(cam_frame_pos)
-                if self.check_seen(map_frame_pos[0], map_frame_pos[1]): continue
+                if self.check_seen(map_frame_pos, obj["color"]): continue
                 self.createMarker(map_frame_pos, obj["color"])
 
         self.object = []
@@ -169,20 +170,18 @@ class ColorPublisher(Node):
     # If too far to left or right the center of the object will be a "fake" center as we do not see the entire object.
     # returns True or False, if centered True. 
     def check_centered(self, x, w):
-        if x+w/2 == self.cam_width:
+        if x+(w/2) == self.cam_width:
             return False
-        elif x-w/2 == 0:
+        elif x-(w/2) == 0:
             return False
         return True
     
     # function finds position of object in camera frame using angle and data from laser scan.
     # returns None or double[3] coordinates. 
     def calc_real_camframe(self, obj):
+        print("calculating position of object in camframe")
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
-        # issue: scans and image callback may not be synchronous causing for this distance from laser scan to be inaccurate to the angle gotten from image data
-        # meaning failure. 
-        # TODO: implement message_filter synchronization with Subscriber and TimeSynchronizer
-        # https://docs.ros.org/en/melodic/api/message_filters/html/python/index.html
+        # dist here is based on distance from lidar rather than distance from camera which is more ideal. error may be negligible however. 
         dist = self.scan_data[hor_angle]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
@@ -190,7 +189,7 @@ class ColorPublisher(Node):
         coords = []
         coords[0] = dist*math.cos(hor_angle*(math.pi/180))
         coords[1] = dist*math.sin(hor_angle*(math.pi/180))
-        coords[2] = dist*math.tan(ver_angle*(math.pi/180))
+        coords[2] = dist*math.tan(ver_angle*(math.pi/180)) 
         return coords
 
     # finds center of color blobs.
@@ -214,10 +213,10 @@ class ColorPublisher(Node):
 
     # check if object has had a marker created already. 
     # returns bool, True if marker for object found. 
-    def check_seen(self, coord):
+    def check_seen(self, coord, color):
         for marker in self.marker_list.markers:
             # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object. 
-            if math.sqrt((marker.pose.positionf.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5):
+            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5 and not abs(coord[3]**2 - marker.pose.position.z**2) <= 0.14):
                 return True
             return False
 
