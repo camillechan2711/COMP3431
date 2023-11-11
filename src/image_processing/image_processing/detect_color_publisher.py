@@ -47,10 +47,10 @@ class ColorPublisher(Node):
         self.tf2_listen = TransformListener(self.tf2_buff, self) 
 
         # camera details for angle+distance math
-        self.hfov = 62
-        self.vfov = 48
-        self.cam_width = 680
-        self.cam_height = 480
+        self.hfov = 18
+        self.vfov = 14
+        self.cam_width = 160
+        self.cam_height = 120
         self.br = CvBridge()
 
     ### callback functions ###
