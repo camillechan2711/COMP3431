@@ -162,9 +162,9 @@ class ColorPublisher(Node):
     # If too far to left or right the center of the object will be a "fake" center as we do not see the entire object.
     # returns True or False, if centered True. 
     def check_centered(self, x, w):
-        if x+w/2 == self.cam_width:
+        if x+(w/2) == self.cam_width:
             return False
-        elif x-w/2 == 0:
+        elif x-(w/2) == 0:
             return False
         return True
     
@@ -172,10 +172,6 @@ class ColorPublisher(Node):
     # returns None or double[3] coordinates. 
     def calc_real_camframe(self, obj):
         hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
-        # issue: scans and image callback may not be synchronous causing for this distance from laser scan to be inaccurate to the angle gotten from image data
-        # meaning failure. 
-        # TODO: implement message_filter synchronization with Subscriber and TimeSynchronizer
-        # https://docs.ros.org/en/melodic/api/message_filters/html/python/index.html
         dist = self.scan_data[hor_angle]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
