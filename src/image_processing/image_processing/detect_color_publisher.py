@@ -78,8 +78,6 @@ class ColorPublisher(Node):
         upper_pink = np.array([163, 234, 226])
         lower_yellow = np.array([0, 93, 88])
         upper_yellow = np.array([100, 252, 205])
-        # lower_green = np.array([0, 93, 62])
-        # upper_green = np.array([81, 235, 255])
         lower_green = np.array([36, 179, 59])
         upper_green = np.array([60, 246, 128])
         lower_blue = np.array([87, 167, 116])
