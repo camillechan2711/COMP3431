@@ -20,20 +20,12 @@ class ColorPublisher(Node):
         super().__init__('color_publisher')
         
         # image data subscription
-        #
-        #self.subscription = self.create_subscription(
-        #    Image,
-        #    '/camera/rgb/image_raw',
-        #    self.image_callback, 10)
-        #self.subscription
-
-        # time synchronized topic subscription
-        image_sub = Subscriber(self, Image, '/camera/rgb/image_raw')
-        scan_sub = Subscriber(self, LaserScan, '/scan')
-        ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
-        ts.registerCallback(self.laser_callback)
-        ts.registerCallback(self.image_callback)
-        print("subscribers initialized")
+        self.subscription = self.create_subscription(
+            Image,
+            '/camera/rgb/image_raw',
+            self.image_callback, 10)
+        self.subscription
+        
         
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
         # Each entry has keys "x": int, x position in image, "y": int, y position in image, "color": string, "centered": bool 
@@ -45,10 +37,10 @@ class ColorPublisher(Node):
         self.marker_list.markers = []
 
         # laser listener
-        #self.scan_data = {}
-        #self.laser_scan = self.create_subscription(LaserScan, "/scan",
-        #                                           self.laser_callback, 
-        #                                           10)
+        self.scan_data = {}
+        self.laser_scan = self.create_subscription(LaserScan, "/scan",
+                                                   self.laser_callback, 
+                                                   10)
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
@@ -62,16 +54,15 @@ class ColorPublisher(Node):
         self.cam_width = 160
         self.cam_height = 120
         self.br = CvBridge()
+        print("subscribers initialized")
 
     ### callback functions ###
-    def laser_callback(self, data):
-        scan = data[1]
+    def laser_callback(self, scan):
         for i in range (-30, 30):
             self.scan_data[abs(i)] = scan.ranges[i]
 
-    def image_callback(self, data):
+    def image_callback(self, msg):
         print("callback received")
-        msg = data[0]
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
