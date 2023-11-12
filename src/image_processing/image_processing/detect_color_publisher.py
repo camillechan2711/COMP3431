@@ -107,7 +107,7 @@ class ColorPublisher(Node):
         if non_zero_blue > threshold:
             self.find_color_positions(mask_blue,'blue')
 
-        cv2.imshow('Result', image)
+        cv2.imshow('Result', cv_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
         # ... [rest of the color detection code]
