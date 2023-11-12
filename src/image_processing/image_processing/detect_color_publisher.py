@@ -70,6 +70,7 @@ class ColorPublisher(Node):
             self.scan_data[abs(i)] = scan.ranges[i]
 
     def image_callback(self, data):
+        print("callback received")
         msg = data[0]
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
