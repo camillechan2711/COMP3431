@@ -7,6 +7,7 @@ from cv_bridge import CvBridge
 from tf2_ros.transform_listener import TransformListener
 from tf2_ros.buffer import Buffer
 from visualization_msgs.msg import Marker, MarkerArray
+from message_filters import ApproximateTimeSynchronizer, Subscriber
 import numpy as np
 import math
 
@@ -19,12 +20,12 @@ class ColorPublisher(Node):
         super().__init__('color_publisher')
         
         # image data subscription
-        self.subscription = self.create_subscription(
-            Image,
-            # changed for testing REMEMBER TO CHANGE BACK!!!!
-            '/camera/image_raw',
-            self.image_callback, 10)
-        self.subscription
+        #self.subscription = self.create_subscription(
+        #    Image,
+        #    # changed for testing REMEMBER TO CHANGE BACK!!!!
+        #    '/camera/image_raw',
+        #    self.image_callback, 10)
+        #self.subscription
         
         
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
@@ -38,14 +39,21 @@ class ColorPublisher(Node):
 
         # laser listener
         self.scan_data = []
-        self.laser_scan = self.create_subscription(LaserScan, "/scan",
-                                                   self.laser_callback)
+        #self.laser_scan = self.create_subscription(LaserScan, "/scan",
+        #                                           self.laser_callback)
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
-        #transform listener.
+        # transform listener.
         self.tf2_buff = Buffer()
         self.tf2_listen = TransformListener(self.tf2_buff, self) 
+        
+        # time synchronized scan and image sub
+        image_sub = Subscriber(self, Image, '/camera/image_raw')
+        scan_sub = Subscriber(self, LaserScan, '/scan')
+        ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
+        ts.registerCallback(self.laser_callback)
+        ts.registerCallback(self.image_callback)
 
         # camera details for angle+distance math
         self.hfov = 18
@@ -56,12 +64,15 @@ class ColorPublisher(Node):
         print("subscribers initialized")
 
     ### callback functions ###
-    def laser_callback(self, scan):
+    def laser_callback(self, image, scan):
         print("laser callback received")
-        for i in range (-30, 30):
-            self.scan_data[abs(i)] = scan.ranges[i]
+        self.scan_data = []
+        for i in range(0,30):
+            self.scan_data.append(scan.ranges[i])
+        for i in range(330, 360):
+            self.scan_data.append(scan.ranges[i])
 
-    def image_callback(self, msg):
+    def image_callback(self, msg, scan):
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
@@ -127,17 +138,15 @@ class ColorPublisher(Node):
         if pink_position:
             print("pink marker found")
             self.appendObject(pink_position, "pink")
-        elif green_position:
+        if green_position:
             print("green marker found")
             self.appendObject(green_position, "green")
-        elif yellow_position:
+        if yellow_position:
             print("yellow marker found")
             self.appendObject(yellow_position, "yellow")
-        elif blue_position:
+        if blue_position:
             print("blue marker found")
             self.appendObject(blue_position, "blue")
-        else:
-            print("no markers found")
         
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
@@ -149,7 +158,9 @@ class ColorPublisher(Node):
                 cam_frame_pos = self.calc_real_camframe(obj)
                 if not cam_frame_pos: continue
                 map_frame_pos = self.transformToMap(cam_frame_pos)
-                if self.check_seen(map_frame_pos, obj["color"]): continue
+                print(map_frame_pos)
+                if self.check_seen(map_frame_pos, obj["color"]): 
+                    continue
                 self.createMarker(map_frame_pos, obj["color"])
 
         self.object = []
@@ -168,9 +179,12 @@ class ColorPublisher(Node):
     # returns True or False, if centered True. 
     def check_centered(self, x, w):
         if x+(w/2) == self.cam_width:
+            print("not centered")
             return False
         elif x-(w/2) == 0:
+            print("not centered")
             return False
+        print("centered")
         return True
     
     # function finds position of object in camera frame using angle and data from laser scan.
@@ -179,12 +193,11 @@ class ColorPublisher(Node):
         print("calculating position of object in camframe")
         hor_angle, ver_angle = self.find_angle_to_obj((obj["x"], obj["y"]))
         # dist here is based on distance from lidar rather than distance from camera which is more ideal. error may be negligible however. 
-        print(self.scan_data)
         dist = self.scan_data[math.floor(hor_angle)]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
             return None
-        coords = []
+        coords = [0, 0, 0]
         coords[0] = dist*math.cos(hor_angle*(math.pi/180))
         coords[1] = dist*math.sin(hor_angle*(math.pi/180))
         coords[2] = dist*math.tan(ver_angle*(math.pi/180)) 
@@ -199,7 +212,6 @@ class ColorPublisher(Node):
             x, y, w, h = cv2.boundingRect(max_contour)
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(image, color_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            print(f"found {color_name}") 
             return (x+(w/2)), (y+(h/2)), w, h
         return None
 
@@ -215,17 +227,18 @@ class ColorPublisher(Node):
     def check_seen(self, coord, color):
         for marker in self.marker_list.markers:
             # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object. 
-            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5 and not abs(coord[3]**2 - marker.pose.position.z**2) <= 0.14):
+            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5 and not abs(coord[2]**2 - marker.pose.position.z**2) <= 0.14):
+                print(f"{color} marker already created")
                 return True
             return False
 
     # function to convert coordinate from camera frame to map frame
     # returns double[3] coordinates.
     def transformToMap(self, coordinate):
-        transform = self.tf2_buff.lookup_transform(target_frame="map", source="camera_link", time=rclpy.time.Time()).transform
-        coordinate[0] = coordinate[0] + transform[0]
-        coordinate[1] = coordinate[1] + transform[1]
-        coordinate[2] = coordinate[2] + transform[2]
+        transform = self.tf2_buff.lookup_transform(target_frame="map", source_frame="camera_link", time=rclpy.time.Time()).transform
+        coordinate[0] = coordinate[0] + transform.translation.x
+        coordinate[1] = coordinate[1] + transform.translation.y
+        coordinate[2] = coordinate[2] + transform.translation.z
         return coordinate
 
 
@@ -235,10 +248,9 @@ class ColorPublisher(Node):
         marker = Marker()
 
         marker.header.frame_id = "/map"
-        marker.header.stamp = rclpy.time.Time()
 
         marker.type = marker.CYLINDER
-        marker.id = len(self.marker_list.markers + 1)
+        marker.id = len(self.marker_list.markers) + 1
 
         # Set the scale of the marker
         marker.scale.x = 0.2
@@ -246,21 +258,21 @@ class ColorPublisher(Node):
         marker.scale.z = 0.2
         marker.color.a = 0.5
         if color == "pink":
-            marker.color.r = 1
+            marker.color.r = 1.0
             marker.color.g = 0.75
             marker.color.b = 0.79
         elif color == "blue":
-            marker.color.r = 0
-            marker.color.g = 0
-            marker.color.b = 1
+            marker.color.r = 0.0
+            marker.color.g = 0.0
+            marker.color.b = 1.0
         elif color == "yellow":
-            marker.color.r = 1
-            marker.color.g = 1
-            marker.color.b = 0
+            marker.color.r = 1.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
         elif color == "green":
-            marker.color.r = 0
-            marker.color.g = 1
-            marker.color.b = 0
+            marker.color.r = 0.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
 
         # Set the pose of the marker
         marker.pose.position.x = coord[0]
@@ -271,7 +283,8 @@ class ColorPublisher(Node):
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
         self.marker_list.markers.append(marker)
-        self.marker_publisher.publish(marker)
+        self.marker_publisher.publish(self.marker_list)
+        print(f"{color} marker created")
         return
 
 def main(args=None):
