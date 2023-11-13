@@ -22,14 +22,15 @@ class ColorPublisher(Node):
         # image data subscription
         self.subscription = self.create_subscription(
             Image,
-            '/camera/rgb/image_raw',
+            # changed for testing REMEMBER TO CHANGE BACK!!!!
+            '/camera/image_raw',
             self.image_callback, 10)
         self.subscription
         
         
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
         # Each entry has keys "x": int, x position in image, "y": int, y position in image, "color": string, "centered": bool 
-        self.object = {}
+        self.object = []
 
         # marker data structure. marker_list.markers stores created markers.
         # ros standard marker structure stored in list.
@@ -86,7 +87,6 @@ class ColorPublisher(Node):
         non_zero_yellow = cv2.countNonZero(mask_yellow)
         non_zero_green = cv2.countNonZero(mask_green)
         non_zero_blue = cv2.countNonZero(mask_blue)
-
         # set a Threshold 
         threshold = 150
 
@@ -94,24 +94,29 @@ class ColorPublisher(Node):
         # result_yellow = cv2.bitwise_and(image, image, mask=mask_yellow)
         # result_green = cv2.bitwise_and(image, image, mask=mask_green)
         print("scanning for markers")
-        if non_zero_pink > threshold:		
+        if non_zero_pink > threshold:	
+            print("pink greater than threshold")	
             self.find_color_positions(mask_pink, 'Pink')
 
         if non_zero_yellow > threshold:
+            print("yellow greater than threshold")
             self.find_color_positions(mask_yellow,'yellow')
 
         if non_zero_green > threshold:
+            print("green greater than threshold")
             self.find_color_positions(mask_green, 'Green')
 
         if non_zero_blue > threshold:
+            print("blue greater than threshold")
             self.find_color_positions(mask_blue,'blue')
 
         cv2.imshow('Result', cv_image)
-        cv2.waitKey(0)
+        cv2.waitKey(1)
         cv2.destroyAllWindows()
         # ... [rest of the color detection code]
 
         # issue: what if two markers are in frame at the same time with the same color? Should maybe have some sort of while loop. 
+        print("initializing positions")
         pink_position = self.find_color_positions(mask_pink, 'Pink', cv_image)
         green_position = self.find_color_positions(mask_green, 'Green', cv_image)
         yellow_position = self.find_color_positions(mask_yellow, 'yellow', cv_image)
@@ -136,6 +141,7 @@ class ColorPublisher(Node):
         cv2.waitKey(1)
 
         # loop through object data structure creating markers for objects detected that are centered and have not had a marker created already
+        print("looping through objects")
         for obj in self.object:
             if obj["centered"]:
                 cam_frame_pos = self.calc_real_camframe(obj)
@@ -169,9 +175,9 @@ class ColorPublisher(Node):
     # returns None or double[3] coordinates. 
     def calc_real_camframe(self, obj):
         print("calculating position of object in camframe")
-        hor_angle, ver_angle = self.find_angle_to_obj(obj["x"], obj["y"])
+        hor_angle, ver_angle = self.find_angle_to_obj((obj["x"], obj["y"]))
         # dist here is based on distance from lidar rather than distance from camera which is more ideal. error may be negligible however. 
-        dist = self.scan_data[hor_angle]
+        dist = self.scan_data[math.floor(hor_angle)]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
             return None
@@ -190,15 +196,16 @@ class ColorPublisher(Node):
             x, y, w, h = cv2.boundingRect(max_contour)
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(image, color_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            print(f"found {color_name}") 
             return (x+(w/2)), (y+(h/2)), w, h
         return None
 
     # append object to object data structure with x and y coords in image, color and centered status.
     # void return, edits object data structure.
     def appendObject(self, position, color):
-        x, y, w = position
+        x, y, w, h = position
         centered = self.check_centered(x, w)
-        self.objects.append({"x": x, "y": y, "color": color, "centered": centered})
+        self.object.append({"x": x, "y": y, "color": color, "centered": centered})
 
     # check if object has had a marker created already. 
     # returns bool, True if marker for object found. 
