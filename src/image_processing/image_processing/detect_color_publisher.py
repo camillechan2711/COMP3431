@@ -56,6 +56,7 @@ class ColorPublisher(Node):
         self.tf2_listen = TransformListener(self.tf2_buff, self) 
         
         # time synchronized scan and image sub
+        # change to /camera/rgb/image_raw on real robot
         image_sub = Subscriber(self, Image, '/camera/image_raw')
         scan_sub = Subscriber(self, LaserScan, '/scan')
         ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
@@ -234,7 +235,8 @@ class ColorPublisher(Node):
     def check_seen(self, coord, color):
         for marker in self.marker_list.markers:
             # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object. 
-            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) <= 0.5 and not abs(coord[2]**2 - marker.pose.position.z**2) <= 0.14):
+            if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) \
+                        + (marker.pose.position.z**2 - coord[2]**2) <= 0.5):
                 print(f"{color} marker already created")
                 return True
             return False
