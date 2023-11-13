@@ -7,7 +7,6 @@ from cv_bridge import CvBridge
 from tf2_ros.transform_listener import TransformListener
 from tf2_ros.buffer import Buffer
 from visualization_msgs.msg import Marker, MarkerArray
-from message_filters import ApproximateTimeSynchronizer, Subscriber
 import numpy as np
 import math
 
@@ -38,10 +37,9 @@ class ColorPublisher(Node):
         self.marker_list.markers = []
 
         # laser listener
-        self.scan_data = {}
+        self.scan_data = []
         self.laser_scan = self.create_subscription(LaserScan, "/scan",
-                                                   self.laser_callback, 
-                                                   10)
+                                                   self.laser_callback)
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
@@ -59,6 +57,7 @@ class ColorPublisher(Node):
 
     ### callback functions ###
     def laser_callback(self, scan):
+        print("laser callback received")
         for i in range (-30, 30):
             self.scan_data[abs(i)] = scan.ranges[i]
 
@@ -88,6 +87,10 @@ class ColorPublisher(Node):
         non_zero_green = cv2.countNonZero(mask_green)
         non_zero_blue = cv2.countNonZero(mask_blue)
         # set a Threshold 
+        print(f"pink pixels: {non_zero_pink}")
+        print(f"yellow pixels: {non_zero_yellow}")
+        print(f"green pixels: {non_zero_green}")
+        print(f"blue pixels: {non_zero_blue}")
         threshold = 150
 
         # result_pink = cv2.bitwise_and(image, image, mask=mask_pink)
@@ -96,19 +99,18 @@ class ColorPublisher(Node):
         print("scanning for markers")
         if non_zero_pink > threshold:	
             print("pink greater than threshold")	
-            self.find_color_positions(mask_pink, 'Pink')
-
+            self.find_color_positions(mask_pink, 'Pink', hsv_image)
         if non_zero_yellow > threshold:
             print("yellow greater than threshold")
-            self.find_color_positions(mask_yellow,'yellow')
+            self.find_color_positions(mask_yellow,'yellow', hsv_image)
 
         if non_zero_green > threshold:
             print("green greater than threshold")
-            self.find_color_positions(mask_green, 'Green')
+            self.find_color_positions(mask_green, 'Green', hsv_image)
 
         if non_zero_blue > threshold:
             print("blue greater than threshold")
-            self.find_color_positions(mask_blue,'blue')
+            self.find_color_positions(mask_blue,'blue', hsv_image) 
 
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
@@ -177,6 +179,7 @@ class ColorPublisher(Node):
         print("calculating position of object in camframe")
         hor_angle, ver_angle = self.find_angle_to_obj((obj["x"], obj["y"]))
         # dist here is based on distance from lidar rather than distance from camera which is more ideal. error may be negligible however. 
+        print(self.scan_data)
         dist = self.scan_data[math.floor(hor_angle)]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
