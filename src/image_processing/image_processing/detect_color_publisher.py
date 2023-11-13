@@ -122,16 +122,16 @@ class ColorPublisher(Node):
             self.appendObject(pink_position, "pink")
         elif green_position:
             print("green marker found")
-            self.appendObject(pink_position, "green")
+            self.appendObject(green_position, "green")
         elif yellow_position:
             print("yellow marker found")
-            self.appendObject(pink_position, "yellow")
+            self.appendObject(yellow_position, "yellow")
         elif blue_position:
             print("blue marker found")
-            self.appendObject(pink_position, "blue")
+            self.appendObject(blue_position, "blue")
         else:
             print("no markers found")
-            print("found pink marker")
+        
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
 
