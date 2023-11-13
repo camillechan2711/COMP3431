@@ -1,4 +1,5 @@
 import rclpy
+import rclpy.qos
 from rclpy.node import Node
 from sensor_msgs.msg import Image, LaserScan
 from std_msgs.msg import String
@@ -38,9 +39,15 @@ class ColorPublisher(Node):
         self.marker_list.markers = []
 
         # laser listener
+        self.qos = rclpy.qos.QoSProfile(
+            reliability=rclpy.qos.QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=rclpy.qos.QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=1
+            )
         self.scan_data = []
         #self.laser_scan = self.create_subscription(LaserScan, "/scan",
         #                                           self.laser_callback)
+        
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
@@ -67,9 +74,9 @@ class ColorPublisher(Node):
     def laser_callback(self, image, scan):
         print("laser callback received")
         self.scan_data = []
-        for i in range(0,30):
+        for i in range (0, 30):
             self.scan_data.append(scan.ranges[i])
-        for i in range(330, 360):
+        for i in range (330, 360):
             self.scan_data.append(scan.ranges[i])
 
     def image_callback(self, msg, scan):
