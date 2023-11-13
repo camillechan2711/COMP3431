@@ -115,33 +115,28 @@ class ColorPublisher(Node):
         # result_pink = cv2.bitwise_and(image, image, mask=mask_pink)
         # result_yellow = cv2.bitwise_and(image, image, mask=mask_yellow)
         # result_green = cv2.bitwise_and(image, image, mask=mask_green)
-        print("scanning for markers")
+        print("initializing positions")
+        pink_position = None 
+        yellow_position = None 
+        green_position = None
+        blue_position = None
         if non_zero_pink > threshold:	
             print("pink greater than threshold")	
-            self.find_color_positions(mask_pink, 'Pink', hsv_image)
+            pink_position = self.find_color_positions(mask_pink, 'Pink', hsv_image)
         if non_zero_yellow > threshold:
             print("yellow greater than threshold")
-            self.find_color_positions(mask_yellow,'yellow', hsv_image)
-
+            yellow_position = self.find_color_positions(mask_yellow, 'yellow', hsv_image)
         if non_zero_green > threshold:
             print("green greater than threshold")
-            self.find_color_positions(mask_green, 'Green', hsv_image)
-
+            green_position = self.find_color_positions(mask_green, 'Green', hsv_image)
         if non_zero_blue > threshold:
             print("blue greater than threshold")
-            self.find_color_positions(mask_blue,'blue', hsv_image) 
+            blue_position = self.find_color_positions(mask_blue, 'blue', hsv_image) 
 
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
         cv2.destroyAllWindows()
-        # ... [rest of the color detection code]
-
-        # issue: what if two markers are in frame at the same time with the same color? Should maybe have some sort of while loop. 
-        print("initializing positions")
-        pink_position = self.find_color_positions(mask_pink, 'Pink', cv_image)
-        green_position = self.find_color_positions(mask_green, 'Green', cv_image)
-        yellow_position = self.find_color_positions(mask_yellow, 'yellow', cv_image)
-        blue_position = self.find_color_positions(mask_blue, 'blue', cv_image)
+               
 
         if pink_position:
             print("pink marker found")
@@ -234,11 +229,16 @@ class ColorPublisher(Node):
     # returns bool, True if marker for object found. 
     def check_seen(self, coord, color):
         for marker in self.marker_list.markers:
-            # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object. 
+            # checks dist of markers to object. if dist is less than 0.5 likely marker is for the object detected. 
             if math.sqrt((marker.pose.position.x**2 - coord[0]**2) + (marker.pose.position.y**2 - coord[1]**2) \
                         + (marker.pose.position.z**2 - coord[2]**2) <= 0.5):
-                print(f"{color} marker already created")
-                return True
+                if (color == "pink" and (marker.color.g == 0.75)) or \
+                   (color == "blue" and (marker.color.b == 1.0)) or \
+                   (color == "yellow" and (marker.color.r == 1.0 and marker.color.g == 1.0)) or \
+                   (color == "green" and (marker.color.g == 1.0 and not marker.color.r == 1.0)):
+                    print(f"{color} marker already created")
+                    return True
+            
             return False
 
     # function to convert coordinate from camera frame to map frame
