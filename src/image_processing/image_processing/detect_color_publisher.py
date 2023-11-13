@@ -1,4 +1,5 @@
 import rclpy
+import rclpy.qos
 from rclpy.node import Node
 from sensor_msgs.msg import Image, LaserScan
 from std_msgs.msg import String
@@ -37,9 +38,15 @@ class ColorPublisher(Node):
         self.marker_list.markers = []
 
         # laser listener
+        self.qos = rclpy.qos.QoSProfile(
+            reliability=rclpy.qos.QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+            history=rclpy.qos.QoSHistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+            depth=1
+            )
         self.scan_data = []
         self.laser_scan = self.create_subscription(LaserScan, "/scan",
-                                                   self.laser_callback)
+                                                   callback=self.laser_callback,
+                                                   qos_profile=self.qos)
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
 
@@ -58,8 +65,11 @@ class ColorPublisher(Node):
     ### callback functions ###
     def laser_callback(self, scan):
         print("laser callback received")
-        for i in range (-30, 30):
-            self.scan_data[abs(i)] = scan.ranges[i]
+        self.scan_data = []
+        for i in range (0, 30):
+            self.scan_data.append(scan.ranges[i])
+        for i in range (330, 360):
+            self.scan_data.append(scan.ranges[i])
 
     def image_callback(self, msg):
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
@@ -184,7 +194,7 @@ class ColorPublisher(Node):
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
         if (dist < 0.5):
             return None
-        coords = []
+        coords = [0, 0, 0]
         coords[0] = dist*math.cos(hor_angle*(math.pi/180))
         coords[1] = dist*math.sin(hor_angle*(math.pi/180))
         coords[2] = dist*math.tan(ver_angle*(math.pi/180)) 
@@ -222,10 +232,10 @@ class ColorPublisher(Node):
     # function to convert coordinate from camera frame to map frame
     # returns double[3] coordinates.
     def transformToMap(self, coordinate):
-        transform = self.tf2_buff.lookup_transform(target_frame="map", source="camera_link", time=rclpy.time.Time()).transform
-        coordinate[0] = coordinate[0] + transform[0]
-        coordinate[1] = coordinate[1] + transform[1]
-        coordinate[2] = coordinate[2] + transform[2]
+        transform = self.tf2_buff.lookup_transform(target_frame="map", source_frame="camera_link", time=rclpy.time.Time()).transform
+        coordinate[0] = coordinate[0] + transform.translation.x
+        coordinate[1] = coordinate[1] + transform.translation.y
+        coordinate[2] = coordinate[2] + transform.translation.z
         return coordinate
 
 
@@ -235,10 +245,9 @@ class ColorPublisher(Node):
         marker = Marker()
 
         marker.header.frame_id = "/map"
-        marker.header.stamp = rclpy.time.Time()
 
         marker.type = marker.CYLINDER
-        marker.id = len(self.marker_list.markers + 1)
+        marker.id = len(self.marker_list.markers) + 1
 
         # Set the scale of the marker
         marker.scale.x = 0.2
@@ -246,21 +255,21 @@ class ColorPublisher(Node):
         marker.scale.z = 0.2
         marker.color.a = 0.5
         if color == "pink":
-            marker.color.r = 1
+            marker.color.r = 1.0
             marker.color.g = 0.75
             marker.color.b = 0.79
         elif color == "blue":
-            marker.color.r = 0
-            marker.color.g = 0
-            marker.color.b = 1
+            marker.color.r = 0.0
+            marker.color.g = 0.0
+            marker.color.b = 1.0
         elif color == "yellow":
-            marker.color.r = 1
-            marker.color.g = 1
-            marker.color.b = 0
+            marker.color.r = 1.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
         elif color == "green":
-            marker.color.r = 0
-            marker.color.g = 1
-            marker.color.b = 0
+            marker.color.r = 0.0
+            marker.color.g = 1.0
+            marker.color.b = 0.0
 
         # Set the pose of the marker
         marker.pose.position.x = coord[0]
@@ -271,7 +280,7 @@ class ColorPublisher(Node):
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
         self.marker_list.markers.append(marker)
-        self.marker_publisher.publish(marker)
+        self.marker_publisher.publish(self.marker_list)
         return
 
 def main(args=None):
