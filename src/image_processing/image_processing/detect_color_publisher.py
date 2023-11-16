@@ -57,7 +57,7 @@ class ColorPublisher(Node):
         
         # time synchronized scan and image sub
         # change to /camera/rgb/image_raw on real robot
-        image_sub = Subscriber(self, Image, '/camera/image_raw')
+        image_sub = Subscriber(self, Image, '/camera/image_raw/uncompressed')
         scan_sub = Subscriber(self, LaserScan, '/scan')
         ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
         ts.registerCallback(self.laser_callback)
@@ -81,8 +81,8 @@ class ColorPublisher(Node):
             self.scan_data.append(scan.ranges[i])
 
     def image_callback(self, msg, scan):
-        cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='bgr8')
-        hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='rgb8')
+        hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2HSV)
 
         # set color range
         lower_pink = np.array([0, 100, 124])
