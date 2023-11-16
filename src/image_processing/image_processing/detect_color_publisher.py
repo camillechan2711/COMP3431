@@ -95,10 +95,10 @@ class ColorPublisher(Node):
         upper_blue = np.array([101, 255, 231])
 
         #  create mask for every color
-        mask_pink = cv2.inRange(hsv_image, lower_pink, upper_pink)
-        mask_yellow = cv2.inRange(hsv_image, lower_yellow, upper_yellow)
-        mask_green = cv2.inRange(hsv_image,lower_green, upper_green)
-        mask_blue = cv2.inRange(hsv_image,lower_blue, upper_blue)
+        mask_pink = cv2.inRange(cv_image, lower_pink, upper_pink)
+        mask_yellow = cv2.inRange(cv_image, lower_yellow, upper_yellow)
+        mask_green = cv2.inRange(cv_image,lower_green, upper_green)
+        mask_blue = cv2.inRange(cv_image,lower_blue, upper_blue)
 
         #  check every color's mask number of non-zero pix
         non_zero_pink = cv2.countNonZero(mask_pink)
