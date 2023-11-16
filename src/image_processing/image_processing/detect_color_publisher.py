@@ -123,16 +123,16 @@ class ColorPublisher(Node):
 
         if non_zero_pink > threshold:	
             print("pink greater than threshold")	
-            pink_position = self.find_color_positions(mask_pink, 'Pink', hsv_image)
+            pink_position = self.find_color_positions(mask_pink, 'Pink', cv_image)
         if non_zero_yellow > threshold:
             print("yellow greater than threshold")
-            yellow_position = self.find_color_positions(mask_yellow, 'yellow', hsv_image)
+            yellow_position = self.find_color_positions(mask_yellow, 'yellow', cv_image)
         if non_zero_green > threshold:
             print("green greater than threshold")
-            green_position = self.find_color_positions(mask_green, 'Green', hsv_image)
+            green_position = self.find_color_positions(mask_green, 'Green', cv_image)
         if non_zero_blue > threshold:
             print("blue greater than threshold")
-            blue_position = self.find_color_positions(mask_blue, 'blue', hsv_image) 
+            blue_position = self.find_color_positions(mask_blue, 'blue', cv_image) 
 
         cv2.imshow('Result', cv_image)
         cv2.waitKey(1)
