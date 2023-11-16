@@ -120,6 +120,7 @@ class ColorPublisher(Node):
         yellow_position = None 
         green_position = None
         blue_position = None
+
         if non_zero_pink > threshold:	
             print("pink greater than threshold")	
             pink_position = self.find_color_positions(mask_pink, 'Pink', hsv_image)
