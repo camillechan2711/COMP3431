@@ -43,7 +43,8 @@ The `WallFollower` node implements a wall following behavior for a robot. It sub
 5. Launch the `WallFollower` node to enable the robot's wall-following behavior.
 
 ## Simulation Recording
-As requested by the Lecturer during the demonstration, the simulation recording can be found [here](https://youtu.be/yWMS20xZg8g)
+As requested by the Lecturer during the demonstration, the simulation recording can be found [here](https://youtu.be/yWMS20xZg8g).
+
 ## License
 
 ### WallFollower Node
