@@ -1,3 +1,0 @@
-[console_scripts]
-image_processing = image_processing.detect_color_publisher:main
-
