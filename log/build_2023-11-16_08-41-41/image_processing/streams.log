@@ -1,0 +1,21 @@
+[0.438s] Invoking command in '/home/comp3431/colcon4_ws/COMP3431/src/image_processing': PYTHONPATH=/home/comp3431/colcon4_ws/COMP3431/build/image_processing/prefix_override:/home/comp3431/colcon4_ws/COMP3431/install/image_processing/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/image_processing build --build-base /home/comp3431/colcon4_ws/COMP3431/build/image_processing/build install --record /home/comp3431/colcon4_ws/COMP3431/build/image_processing/install.log --install-scripts $base/lib/image_processing --single-version-externally-managed
+[0.577s] running egg_info
+[0.577s] writing ../../build/image_processing/image_processing.egg-info/PKG-INFO
+[0.578s] writing dependency_links to ../../build/image_processing/image_processing.egg-info/dependency_links.txt
+[0.578s] writing entry points to ../../build/image_processing/image_processing.egg-info/entry_points.txt
+[0.578s] writing requirements to ../../build/image_processing/image_processing.egg-info/requires.txt
+[0.578s] writing top-level names to ../../build/image_processing/image_processing.egg-info/top_level.txt
+[0.597s] reading manifest file '../../build/image_processing/image_processing.egg-info/SOURCES.txt'
+[0.598s] writing manifest file '../../build/image_processing/image_processing.egg-info/SOURCES.txt'
+[0.598s] running build
+[0.598s] running build_py
+[0.598s] running install
+[0.599s] running install_lib
+[0.600s] running install_data
+[0.600s] running install_egg_info
+[0.602s] removing '/home/comp3431/colcon4_ws/COMP3431/install/image_processing/lib/python3.8/site-packages/image_processing-0.0.0-py3.8.egg-info' (and everything under it)
+[0.602s] Copying ../../build/image_processing/image_processing.egg-info to /home/comp3431/colcon4_ws/COMP3431/install/image_processing/lib/python3.8/site-packages/image_processing-0.0.0-py3.8.egg-info
+[0.603s] running install_scripts
+[0.627s] Installing image_processing script to /home/comp3431/colcon4_ws/COMP3431/install/image_processing/lib/image_processing
+[0.627s] writing list of installed files to '/home/comp3431/colcon4_ws/COMP3431/build/image_processing/install.log'
+[0.646s] Invoked command in '/home/comp3431/colcon4_ws/COMP3431/src/image_processing' returned '0': PYTHONPATH=/home/comp3431/colcon4_ws/COMP3431/build/image_processing/prefix_override:/home/comp3431/colcon4_ws/COMP3431/install/image_processing/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/image_processing build --build-base /home/comp3431/colcon4_ws/COMP3431/build/image_processing/build install --record /home/comp3431/colcon4_ws/COMP3431/build/image_processing/install.log --install-scripts $base/lib/image_processing --single-version-externally-managed

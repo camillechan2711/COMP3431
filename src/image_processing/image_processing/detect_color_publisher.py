@@ -20,13 +20,13 @@ class ColorPublisher(Node):
     def __init__(self):
         super().__init__('color_publisher')
         
-        # image data subscription
-        #self.subscription = self.create_subscription(
-        #    Image,
-        #    # changed for testing REMEMBER TO CHANGE BACK!!!!
-        #    '/camera/image_raw',
-        #    self.image_callback, 10)
-        #self.subscription
+        #image data subscription
+        self.subscription = self.create_subscription(
+            Image,
+            # changed for testing REMEMBER TO CHANGE BACK!!!!
+            '/camera/image_raw/uncompressed',
+            self.image_callback, 10)
+        self.subscription
         
         
         # object data structure. For storing detected marker objects before creating a marker. Resets each image_callback loop. 
@@ -45,8 +45,9 @@ class ColorPublisher(Node):
             depth=1
             )
         self.scan_data = []
-        #self.laser_scan = self.create_subscription(LaserScan, "/scan",
-        #                                           self.laser_callback)
+        self.laser_scan = self.create_subscription(LaserScan, "/scan",
+                                                   self.laser_callback,
+                                                   self.qos)
         
         # marker publisher
         self.marker_publisher = self.create_publisher(MarkerArray, "visualization_marker_array", 10)
@@ -57,11 +58,11 @@ class ColorPublisher(Node):
         
         # time synchronized scan and image sub
         # change to /camera/rgb/image_raw on real robot
-        image_sub = Subscriber(self, Image, '/camera/image_raw/uncompressed')
-        scan_sub = Subscriber(self, LaserScan, '/scan')
-        ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
-        ts.registerCallback(self.laser_callback)
-        ts.registerCallback(self.image_callback)
+        #image_sub = Subscriber(self, Image, '/camera/image_raw/uncompressed')
+        #scan_sub = Subscriber(self, LaserScan, '/scan')
+        #ts = ApproximateTimeSynchronizer([image_sub, scan_sub], 1, 1)
+        #ts.registerCallback(self.laser_callback)
+        #ts.registerCallback(self.image_callback)
 
         # camera details for angle+distance math
         self.hfov = 18
@@ -72,7 +73,7 @@ class ColorPublisher(Node):
         print("subscribers initialized")
 
     ### callback functions ###
-    def laser_callback(self, image, scan):
+    def laser_callback(self, scan):
         print("laser callback received")
         self.scan_data = []
         for i in range (0, 30):
@@ -80,7 +81,7 @@ class ColorPublisher(Node):
         for i in range (330, 360):
             self.scan_data.append(scan.ranges[i])
 
-    def image_callback(self, msg, scan):
+    def image_callback(self, msg):
         cv_image = self.br.imgmsg_to_cv2(msg, desired_encoding='rgb8')
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_RGB2HSV)
 
@@ -158,6 +159,8 @@ class ColorPublisher(Node):
         # loop through object data structure creating markers for objects detected that are centered and have not had a marker created already
         print("looping through objects")
         for obj in self.object:
+            if self.scan_data == []:
+            	continue
             if obj["centered"]:
                 cam_frame_pos = self.calc_real_camframe(obj)
                 if not cam_frame_pos: continue
@@ -196,10 +199,13 @@ class ColorPublisher(Node):
     def calc_real_camframe(self, obj):
         print("calculating position of object in camframe")
         hor_angle, ver_angle = self.find_angle_to_obj((obj["x"], obj["y"]))
+        print(hor_angle)
         # dist here is based on distance from lidar rather than distance from camera which is more ideal. error may be negligible however. 
         dist = self.scan_data[math.floor(hor_angle)]
         # check for if object is too close. too close will cause for incorrect z pos, stops marker creation in image_callback
-        if (dist < 0.5):
+        dist = self.scan_data[math.floor(hor_angle)]
+        if (dist < 0.35):
+            print("too close")
             return None
         coords = [0, 0, 0]
         coords[0] = dist*math.cos(hor_angle*(math.pi/180))
