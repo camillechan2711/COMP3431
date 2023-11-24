@@ -44,6 +44,8 @@ The `WallFollower` node implements a wall following behavior for a robot. It sub
 
 ## License
 
+### WallFollower Node
+
 The code in this repository is licensed under the Apache License, Version 2.0.
 
 ---
