@@ -1,0 +1,55 @@
+[0.159s] Invoking command in '/home/comp3431/colcon4_ws/COMP3431/build/wall_follower': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/comp3431/colcon4_ws/COMP3431/install/image_processing:/home/comp3431/turtlebot3_ws/install/turtlebot3_teleop:/home/comp3431/turtlebot3_ws/install/turtlebot3_example:/opt/ros/foxy /usr/bin/cmake --build /home/comp3431/colcon4_ws/COMP3431/build/wall_follower -- -j4 -l4
+[0.213s] [100%] Built target wall_follower
+[0.228s] Invoked command in '/home/comp3431/colcon4_ws/COMP3431/build/wall_follower' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/comp3431/colcon4_ws/COMP3431/install/image_processing:/home/comp3431/turtlebot3_ws/install/turtlebot3_teleop:/home/comp3431/turtlebot3_ws/install/turtlebot3_example:/opt/ros/foxy /usr/bin/cmake --build /home/comp3431/colcon4_ws/COMP3431/build/wall_follower -- -j4 -l4
+[0.281s] Invoking command in '/home/comp3431/colcon4_ws/COMP3431/build/wall_follower': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/comp3431/colcon4_ws/COMP3431/install/image_processing:/home/comp3431/turtlebot3_ws/install/turtlebot3_teleop:/home/comp3431/turtlebot3_ws/install/turtlebot3_example:/opt/ros/foxy /usr/bin/cmake --install /home/comp3431/colcon4_ws/COMP3431/build/wall_follower
+[0.286s] -- Install configuration: ""
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/lib/wall_follower/wall_follower
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower//launch
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include/
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/.wall_follower.hpp.swp
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/wall_follower.hpp
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/build
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/build/.built_by
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/build/COLCON_IGNORE
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/local_setup.bash
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/.colcon_install_layout
+[0.287s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/_local_setup_util_sh.py
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/setup.bash
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/local_setup.ps1
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/local_setup.sh
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/setup.zsh
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/COLCON_IGNORE
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/_local_setup_util_ps1.py
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/setup.sh
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/local_setup.zsh
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/install/setup.ps1
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/build_2023-11-02_07-58-09
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/build_2023-11-02_07-58-09/logger_all.log
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/build_2023-11-02_07-58-09/events.log
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/build_2023-11-02_07-57-44
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/build_2023-11-02_07-57-44/logger_all.log
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/build_2023-11-02_07-57-44/events.log
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/COLCON_IGNORE
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/latest
+[0.288s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/include//wall_follower/log/latest_build
+[0.293s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/ament_index/resource_index/package_run_dependencies/wall_follower
+[0.294s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/ament_index/resource_index/parent_prefix_path/wall_follower
+[0.294s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/environment/ament_prefix_path.sh
+[0.294s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/environment/ament_prefix_path.dsv
+[0.294s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/environment/path.sh
+[0.294s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/environment/path.dsv
+[0.294s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/local_setup.bash
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/local_setup.sh
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/local_setup.zsh
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/local_setup.dsv
+[0.295s] -- Installing: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/package.dsv
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/ament_index/resource_index/packages/wall_follower
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/cmake/ament_cmake_export_include_directories-extras.cmake
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/cmake/ament_cmake_export_dependencies-extras.cmake
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/cmake/wall_followerConfig.cmake
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/cmake/wall_followerConfig-version.cmake
+[0.295s] -- Up-to-date: /home/comp3431/colcon4_ws/COMP3431/install/wall_follower/share/wall_follower/package.xml
+[0.297s] Invoked command in '/home/comp3431/colcon4_ws/COMP3431/build/wall_follower' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/comp3431/colcon4_ws/COMP3431/install/image_processing:/home/comp3431/turtlebot3_ws/install/turtlebot3_teleop:/home/comp3431/turtlebot3_ws/install/turtlebot3_example:/opt/ros/foxy /usr/bin/cmake --install /home/comp3431/colcon4_ws/COMP3431/build/wall_follower
