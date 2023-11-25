@@ -22,7 +22,7 @@ The `ColorPublisher` node subscribes to an image topic and a laser scan topic. I
 2. Clone this repository into your ROS workspace.
 3. Build the workspace using `colcon build`.
 4. Run the ROS 2 system.
-5. Launch the `ColorPublisher` node to start the color detection and marker publishing process.
+5. Launch the `ImageProcessing` node to start the color detection and marker publishing process.
 
 ## WallFollower Node
 
